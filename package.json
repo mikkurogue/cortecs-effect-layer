@@ -2,25 +2,28 @@
   "name": "test-eff-ai",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devEngines": {},
-  "type": "module",
   "dependencies": {
     "@effect/ai-openai": "4.0.0-beta.83",
+    "@effect/ai-openai-compat": "4.0.0-beta.83",
     "dotenv": "^17.4.2",
     "effect": "4.0.0-beta.83",
-    "ora": "^9.4.0"
+    "ora": "^9.4.0",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
-  }
+  },
+  "devEngines": {}
 }
