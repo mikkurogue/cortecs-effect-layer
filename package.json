@@ -13,7 +13,9 @@
   "type": "module",
   "dependencies": {
     "@effect/ai-openai": "4.0.0-beta.83",
-    "effect": "4.0.0-beta.83"
+    "dotenv": "^17.4.2",
+    "effect": "4.0.0-beta.83",
+    "ora": "^9.4.0"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",

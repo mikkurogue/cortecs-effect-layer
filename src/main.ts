@@ -1,6 +1,18 @@
-import { Effect, Layer, Context, Redacted } from 'effect';
+import 'dotenv/config';
+import ora from 'ora';
+import { Effect, Layer, Context, Config } from 'effect';
 import { LanguageModel, Model, AiError } from 'effect/unstable/ai';
 import { CortecsLayer, CortecsConfig } from './cortecs';
+
+const withSpinner = <A, E, R>(text: string, self: Effect.Effect<A, E, R>): Effect.Effect<A, E, R> =>
+  Effect.gen(function* () {
+    const spinner = yield* Effect.sync(() => ora({ text }).start());
+    const result = yield* self.pipe(
+      Effect.tap(() => Effect.sync(() => spinner.succeed())),
+      Effect.tapError(() => Effect.sync(() => spinner.fail())),
+    );
+    return result;
+  });
 
 export class AiSlopper extends Context.Service<
   AiSlopper,
@@ -15,15 +27,16 @@ export class AiSlopper extends Context.Service<
 
     Effect.gen(function* () {
       const query = Effect.fn('AiSlopper.query')(function* (proompt: string) {
-        yield* Effect.log('Executing AI prompt:', proompt);
+        const response = yield* withSpinner(
+          'Calling Cortecs.ai...',
+          LanguageModel.generateText({
+            prompt: `write a short text saying hello to ${proompt}`,
+          }),
+        );
 
-        const response = yield* LanguageModel.generateText({
-          prompt: `write a short text saying hello to ${proompt}`
-        })
+        const provider = yield* Model.ProviderName;
 
-        const provider = yield* Model.ProviderName
-
-        return { provider: provider, text: response.text };
+        return { provider, text: response.text };
       });
 
       return AiSlopper.of({
@@ -41,11 +54,17 @@ const program = Effect.gen(function* () {
   Effect.provide(AiSlopper.layer),
   Effect.provide(CortecsLayer),
   Effect.provide(
-    Layer.succeed(CortecsConfig, {
-      apiKey: Redacted.make('PLACEHOLDER_KEY'),
-      baseUrl: 'https://api.cortecs.ai/v1',
-      model: 'kimi-k2.5',
-    }),
+    Layer.effect(
+      CortecsConfig,
+      Effect.gen(function* () {
+        const apiKey = yield* Config.redacted('CORTECS_API_KEY');
+        return {
+          apiKey,
+          baseUrl: 'https://api.cortecs.ai/v1',
+          model: 'kimi-k2.5',
+        } as const;
+      }),
+    ),
   ),
 );
 
